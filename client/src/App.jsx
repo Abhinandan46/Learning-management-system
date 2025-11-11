@@ -1,36 +1,35 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Global CSS
-import './App.css';
+import "./App.css";
 
-// Components
-import Navbar from './components/Navbar';
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
-// Pages
-import Home from './pages/Home';
-import CourseDetail from './pages/CourseDetail'; // Fix #1: Path ko 'pages' kiya
-import Login from './pages/Login'; // Fix #2: Login component import kiya
-import Footer from './components/Footer';
-import Dashboard from './pages/Dashboard';
+import Home from "./pages/Home";
+import CourseDetail from "./pages/CourseDetail";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Interview from "./pages/Interview";
+
 function App() {
   return (
     <BrowserRouter>
-      {/* Navbar ab hamesha top par rahega */}
       <Navbar />
-      
-      {/* Fix #3: Wo extra padding wala div hata diya */}
+
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/course/:id" element={<CourseDetail />} />
-          <Route path="/login" element={<Login />} /> {/* Fix #4: h2 tag ki jagah Login component dala */}
-          
-          {/* Placeholder for future */}
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* Interview Route */}
+          <Route path="/interview" element={<Interview />} />
         </Routes>
       </main>
+
       <Footer />
-      </BrowserRouter>
+    </BrowserRouter>
   );
 }
 

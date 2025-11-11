@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { courses } from '../data';
+
 // Icons import karein
 import { FaLaptopCode, FaDatabase, FaBullhorn, FaCertificate, FaInfinity, FaVideo } from 'react-icons/fa';
 
@@ -154,7 +155,9 @@ const Home = () => {
           <div className="resource-card">
             <h3>Interview Questions</h3>
             <p>Most asked React, Node.js, and MongoDB interview questions.</p>
-            <Link to="/dashboard" className="btn" style={{width: 'auto'}}>Start Practicing</Link>
+            <Link to="/interview">
+              <button className="btn">Start Practicing</button>
+              </Link>
           </div>
           <div className="resource-card">
             <h3>Cheatsheets</h3>
