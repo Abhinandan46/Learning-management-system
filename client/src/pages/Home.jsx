@@ -1,65 +1,256 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { courses } from '../data';
 
 // Icons import karein
-import { FaLaptopCode, FaDatabase, FaBullhorn, FaCertificate, FaInfinity, FaVideo } from 'react-icons/fa';
+import { FaLaptopCode, FaDatabase, FaBullhorn, FaCertificate, FaInfinity, FaVideo, FaRobot, FaCloud, FaPaintBrush, FaTools, FaLock, FaChartLine, FaServer, FaCode, FaPython, FaJs, FaHtml5, FaGit, FaDocker, FaRocket, FaUsers, FaBookOpen, FaGraduationCap, FaTrophy, FaFire, FaStar, FaQuestionCircle, FaClock } from 'react-icons/fa';
 
 const Home = () => {
+  const [animatedCounters, setAnimatedCounters] = useState({
+    students: 0,
+    courses: 0,
+    hours: 0,
+    rating: 0
+  });
+
+  const [visibleSections, setVisibleSections] = useState(new Set());
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    // Animate counters
+    const targets = {
+      students: 12500,
+      courses: 150,
+      hours: 25000,
+      rating: 4.8
+    };
+
+    const duration = 2000;
+    const steps = 60;
+    const increment = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+
+      setAnimatedCounters({
+        students: Math.floor(targets.students * progress),
+        courses: Math.floor(targets.courses * progress),
+        hours: Math.floor(targets.hours * progress),
+        rating: Math.min(targets.rating * progress, targets.rating)
+      });
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        setAnimatedCounters(targets);
+      }
+    }, increment);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisibleSections(prev => new Set([...prev, entry.target.id]));
+        }
+      });
+    }, observerOptions);
+
+    // Observe all sections
+    const sections = document.querySelectorAll('[data-animate]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleInterviewClick = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   return (
     <div>
+      {/* Floating Action Button */}
+      <button className="fab tooltip" onClick={handleInterviewClick}>
+        <FaQuestionCircle />
+        <span className="tooltip-text">Quick access to Interview Questions</span>
+      </button>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast toast-success show">
+          <span className="toast-icon">🚀</span>
+          <div>
+            <strong>Interview Practice</strong>
+            <p>Redirecting to interview questions...</p>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div className="hero">
-        <h1>Unlock Your Potential</h1>
-        <p style={{ marginTop: '10px', opacity: '0.9' }}>
+        <div className="particles">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 6}s`,
+                animationDuration: `${6 + Math.random() * 4}s`
+              }}
+            />
+          ))}
+        </div>
+        <h1 className="fade-in-up">Unlock Your Potential</h1>
+        <p className="fade-in-up" style={{ animationDelay: '0.2s' }}>
           Learn from industry experts and boost your career today.
         </p>
-      </div>
 
-      {/* --- NEW: Categories Section --- */}
-      <div className="container">
-        <h2 className="section-title">Popular Categories</h2>
-        <div className="category-grid">
-          <div className="category-card">
-            <FaLaptopCode size={30} />
-            <p>Web Development</p>
-          </div>
-          <div className="category-card">
-            <FaDatabase size={30} />
-            <p>Data Science</p>
-          </div>
-          <div className="category-card">
-            <FaBullhorn size={30} />
-            <p>Marketing</p>
-          </div>
-          <div className="category-card">
-            {/* Business icon */}
-            <span style={{fontSize: '30px'}}>📈</span>
-            <p>Business</p>
+        {/* Stats Section */}
+        <div className="container" style={{ marginTop: '3rem', textAlign: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+            <div className="stat-card">
+              <span className="stat-number animate-count">{animatedCounters.students.toLocaleString()}</span>
+              <span className="stat-label">Students</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number animate-count">{animatedCounters.courses}</span>
+              <span className="stat-label">Courses</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number animate-count">{animatedCounters.hours.toLocaleString()}</span>
+              <span className="stat-label">Learning Hours</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number animate-count">{animatedCounters.rating}</span>
+              <span className="stat-label">Avg Rating</span>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                {[...Array(5)].map((_, i) => (
+                  <FaStar key={i} color={i < Math.floor(animatedCounters.rating) ? '#f59e0b' : '#e5e7eb'} size={16} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* --- Featured Courses Section --- */}
-      <div className="container">
-        <h2 className="section-title">Featured Courses</h2>
-        <div className="course-grid">
-          {courses.map((course) => (
-            <div key={course.id} className="course-card">
-              <img src={course.thumbnail} alt={course.title} />
-              <div className="card-body">
-                <h3>{course.title}</h3>
-                <p className="instructor">By {course.instructor}</p>
-                <div className="meta-info">
-                  <span>⭐ {course.rating}</span>
-                  <span className="price">{course.price}</span>
-                </div>
-                <Link to={`/course/${course.id}`} className="btn">
-                  Enroll Now
-                </Link>
-              </div>
+      {/* --- NEW: Categories Section --- */}
+      <div className="container" data-animate id="categories-section">
+        <h2 className={`section-title ${visibleSections.has('categories-section') ? 'fade-in-up' : ''}`}>Popular Categories</h2>
+        <div className={`category-grid ${visibleSections.has('categories-section') ? 'fade-in-up' : ''}`} style={{ animationDelay: '0.3s' }}>
+          <Link to="/dashboard?category=react" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaLaptopCode /></div>
+              <p className="category-label">React</p>
             </div>
-          ))}
+          </Link>
+
+          <Link to="/dashboard?category=data-science" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaDatabase /></div>
+              <p className="category-label">Data Science</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=ai-ml" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaRobot /></div>
+              <p className="category-label">AI & Machine Learning</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=nodejs" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaServer /></div>
+              <p className="category-label">Node.js</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=mongodb" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaDatabase /></div>
+              <p className="category-label">MongoDB</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=express" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaCode /></div>
+              <p className="category-label">Express.js</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=python" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaPython /></div>
+              <p className="category-label">Python</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=javascript" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaJs /></div>
+              <p className="category-label">JavaScript</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=html-css" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaHtml5 /></div>
+              <p className="category-label">HTML & CSS</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=git" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaGit /></div>
+              <p className="category-label">Git & GitHub</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=docker" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaDocker /></div>
+              <p className="category-label">Docker</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=aws" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaCloud /></div>
+              <p className="category-label">AWS</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=cybersecurity" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaLock /></div>
+              <p className="category-label">Cybersecurity</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=ui-ux" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaPaintBrush /></div>
+              <p className="category-label">UI/UX Design</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard?category=devops" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="category-card">
+              <div className="category-icon"><FaTools /></div>
+              <p className="category-label">DevOps</p>
+            </div>
+          </Link>
         </div>
       </div>
 
@@ -87,6 +278,56 @@ const Home = () => {
         </div>
       </div>
 
+      {/* --- NEW: Learning Progress Section --- */}
+      <div className="container" data-animate id="progress-section">
+        <h2 className={`section-title ${visibleSections.has('progress-section') ? 'fade-in-up' : ''}`}>Your Learning Journey</h2>
+        <div className={`progress-grid ${visibleSections.has('progress-section') ? 'fade-in-up' : ''}`} style={{ animationDelay: '0.2s' }}>
+          <div className="progress-card">
+            <div className="progress-header">
+              <FaBookOpen size={24} />
+              <span className="progress-title">Courses Completed</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{width: '75%'}}></div>
+            </div>
+            <span className="progress-text">15 of 20 courses</span>
+          </div>
+
+          <div className="progress-card">
+            <div className="progress-header">
+              <FaClock size={24} />
+              <span className="progress-title">Study Hours</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{width: '60%'}}></div>
+            </div>
+            <span className="progress-text">120 of 200 hours</span>
+          </div>
+
+          <div className="progress-card">
+            <div className="progress-header">
+              <FaTrophy size={24} />
+              <span className="progress-title">Achievements</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{width: '45%'}}></div>
+            </div>
+            <span className="progress-text">9 of 20 badges</span>
+          </div>
+
+          <div className="progress-card">
+            <div className="progress-header">
+              <FaStar size={24} />
+              <span className="progress-title">Average Score</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{width: '88%'}}></div>
+            </div>
+            <span className="progress-text">88% overall</span>
+          </div>
+        </div>
+      </div>
+
       {/* --- NEW: Student Achievements Section --- */}
       <div className="container">
         <h2 className="section-title">Student Achievements</h2>
@@ -109,41 +350,103 @@ const Home = () => {
         </div>
       </div>
 
-      {/* --- NEW: Student Testimonials --- */}
-      <div className="testimonials">
-        <div className="container">
-          <h2 className="section-title" style={{color: 'white'}}>What Students Say</h2>
-          <div className="testimonial-grid">
-            <div className="testimonial-card">
-              <p>"The courses are concise and practical. I landed an internship!"</p>
-              <div className="t-meta">
-                <img src="https://i.pravatar.cc/48?img=12" alt="student" />
-                <div>
-                  <strong>Priya Sharma</strong>
-                  <span>Frontend Learner</span>
-                </div>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <p>"The quizzes and projects boosted my confidence for interviews."</p>
-              <div className="t-meta">
-                <img src="https://i.pravatar.cc/48?img=32" alt="student" />
-                <div>
-                  <strong>Arjun Verma</strong>
-                  <span>MERN Track</span>
-                </div>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <p>"Loved the lifelong access. I revisit lessons whenever I need."</p>
-              <div className="t-meta">
-                <img src="https://i.pravatar.cc/48?img=5" alt="student" />
-                <div>
-                  <strong>Neha Gupta</strong>
-                  <span>Data Science</span>
-                </div>
-              </div>
-            </div>
+      {/* --- NEW: BCA Notes Section --- */}
+      <div className="container">
+        <h2 className="section-title">BCA Study Notes</h2>
+        <div className="resources-grid">
+          <div className="resource-card">
+            <h3>Semester 1 Notes</h3>
+            <p>Computer Fundamentals, Programming in C, Mathematics</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Semester 2 Notes</h3>
+            <p>Data Structures, OOP with C++, Digital Electronics</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Semester 3 Notes</h3>
+            <p>Database Management, Web Technologies, Python Programming</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Semester 4 Notes</h3>
+            <p>Java Programming, Software Engineering, Computer Networks</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Semester 5 Notes</h3>
+            <p>Android Development, Cloud Computing, Data Mining</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Semester 6 Notes</h3>
+            <p>Project Management, AI & ML, Cybersecurity</p>
+            <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* --- NEW: BCA Syllabus Section --- */}
+      <div className="container">
+        <h2 className="section-title">BCA Syllabus</h2>
+        <div className="resources-grid">
+          <div className="resource-card">
+            <h3>Complete BCA Syllabus</h3>
+            <p>Official BCA syllabus from Himachal Pradesh University</p>
+            <a href="https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Download Syllabus</a>
+          </div>
+          <div className="resource-card">
+            <h3>Subject-wise Topics</h3>
+            <p>Detailed breakdown of topics for each subject</p>
+            <a href="https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Explore Topics</a>
+          </div>
+          <div className="resource-card">
+            <h3>Practical Lab Syllabus</h3>
+            <p>Hands-on lab exercises and project guidelines</p>
+            <a href="https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Lab Guide</a>
+          </div>
+          <div className="resource-card">
+            <h3>Elective Subjects</h3>
+            <p>Specialization options and elective course details</p>
+            <a href="https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>View Electives</a>
+          </div>
+        </div>
+      </div>
+
+      {/* --- NEW: BCA Question Papers Section --- */}
+      <div className="container">
+        <h2 className="section-title">BCA Question Papers</h2>
+        <div className="resources-grid">
+          <div className="resource-card">
+            <h3>Previous Year Papers</h3>
+            <p>Question papers from 2018-2024 with solutions</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Download Papers</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Sample Papers</h3>
+            <p>Practice papers with detailed answer keys</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Practice Now</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Important Questions</h3>
+            <p>Frequently asked questions and model answers</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Study Questions</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Mock Tests</h3>
+            <p>Online mock tests with instant results</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Take Test</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Subject-wise Papers</h3>
+            <p>Question papers organized by subject and semester</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Browse Papers</Link>
+          </div>
+          <div className="resource-card">
+            <h3>University Guidelines</h3>
+            <p>Exam patterns, marking schemes, and guidelines</p>
+            <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Exam Guide</Link>
           </div>
         </div>
       </div>
@@ -155,7 +458,7 @@ const Home = () => {
           <div className="resource-card">
             <h3>Interview Questions</h3>
             <p>Most asked React, Node.js, and MongoDB interview questions.</p>
-            <Link to="/interview">
+            <Link to="/dashboard#interview-section">
               <button className="btn">Start Practicing</button>
               </Link>
           </div>
@@ -168,6 +471,111 @@ const Home = () => {
             <h3>Community</h3>
             <p>Join our Discord to collaborate and get help.</p>
             <a href="https://discord.com" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Join Now</a>
+          </div>
+          <div className="resource-card">
+            <h3>Coding Challenges</h3>
+            <p>Practice coding problems and algorithms daily.</p>
+            <a href="https://leetcode.com" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Solve Problems</a>
+          </div>
+          <div className="resource-card">
+            <h3>Documentation</h3>
+            <p>Official docs for React, Node.js, MongoDB, and more.</p>
+            <a href="https://react.dev" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Read Docs</a>
+          </div>
+          <div className="resource-card">
+            <h3>Project Templates</h3>
+            <p>Starter templates for MERN stack and other projects.</p>
+            <a href="https://github.com" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Get Templates</a>
+          </div>
+          <div className="resource-card">
+            <h3>Career Resources</h3>
+            <p>Resume tips, job search guides, and career advice.</p>
+            <Link to="/dashboard" className="btn" style={{width: 'auto'}}>Explore</Link>
+          </div>
+          <div className="resource-card">
+            <h3>Free Tools</h3>
+            <p>Essential development tools and online editors.</p>
+            <a href="https://codepen.io" target="_blank" rel="noreferrer" className="btn" style={{width: 'auto'}}>Try Tools</a>
+          </div>
+          <div className="resource-card">
+            <h3>Webinars</h3>
+            <p>Live sessions with industry experts and Q&A.</p>
+            <Link to="/dashboard" className="btn" style={{width: 'auto'}}>Watch Now</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* --- NEW: Testimonials Section --- */}
+      <div className="testimonials" data-animate id="testimonials-section">
+        <div className="container">
+          <h2 className={`section-title ${visibleSections.has('testimonials-section') ? 'fade-in-up' : ''}`} style={{color: 'white'}}>What Our Students Say</h2>
+          <div className={`testimonial-grid ${visibleSections.has('testimonials-section') ? 'fade-in-up' : ''}`} style={{ animationDelay: '0.3s' }}>
+            <div className="testimonial-card">
+              <div style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#fbbf24' }}>
+                {'★'.repeat(5)}
+              </div>
+              <p style={{ fontStyle: 'italic', marginBottom: '1rem', color: '#e5e7eb' }}>
+                "This platform transformed my career! The React course was comprehensive and the interview questions helped me land my dream job."
+              </p>
+              <div className="t-meta">
+                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face" alt="Sarah Johnson" />
+                <div>
+                  <strong style={{ color: 'white' }}>Sarah Johnson</strong>
+                  <span>Frontend Developer</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#fbbf24' }}>
+                {'★'.repeat(5)}
+              </div>
+              <p style={{ fontStyle: 'italic', marginBottom: '1rem', color: '#e5e7eb' }}>
+                "The BCA study materials are excellent. The syllabus coverage and question papers helped me score 95% in my exams."
+              </p>
+              <div className="t-meta">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" alt="Rahul Sharma" />
+                <div>
+                  <strong style={{ color: 'white' }}>Rahul Sharma</strong>
+                  <span>BCA Student</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#fbbf24' }}>
+                <span style={{ color: '#fbbf24' }}>{'★'.repeat(5)}</span>
+              </div>
+              <p style={{ fontStyle: 'italic', marginBottom: '1rem', color: '#e5e7eb' }}>
+                "Node.js and MongoDB courses are top-notch. The practical projects and real-world examples made learning enjoyable."
+              </p>
+              <div className="t-meta">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" alt="Emily Chen" />
+                <div>
+                  <strong style={{ color: 'white' }}>Emily Chen</strong>
+                  <span>Full Stack Developer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- NEW: Newsletter Signup Section --- */}
+      <div className="container" data-animate id="newsletter-section">
+        <div className={`newsletter-signup ${visibleSections.has('newsletter-section') ? 'fade-in-up' : ''}`}>
+          <div className="newsletter-content">
+            <h2>Stay Updated</h2>
+            <p>Get the latest courses, study materials, and exclusive offers delivered to your inbox.</p>
+            <div className="newsletter-form">
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                className="newsletter-input"
+              />
+              <button className="btn newsletter-btn">Subscribe</button>
+            </div>
+            <p className="newsletter-note">No spam, unsubscribe at any time.</p>
           </div>
         </div>
       </div>
