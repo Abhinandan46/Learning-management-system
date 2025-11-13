@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import "./App.css";
 
@@ -34,9 +34,10 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirects to home if already authenticated)
+// Public Route Component (redirects to home if already authenticated, but allows access to auth pages)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -52,13 +53,24 @@ const PublicRoute = ({ children }) => {
     );
   }
 
+  // Allow access to login and register pages even if authenticated
+  // This enables navigation between login and register pages
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  if (isAuthPage) {
+    return children;
+  }
+
+  // For other public routes, redirect authenticated users to home
   return isAuthenticated ? <Navigate to="/" replace /> : children;
 };
 
 function AppContent() {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
   return (
     <>
-      <Navbar />
+      {!isAuthPage && <Navbar />}
 
       <main>
         <Routes>
@@ -95,7 +107,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      <Footer />
+      {!isAuthPage && <Footer />}
     </>
   );
 }

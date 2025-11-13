@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import ReactPlayer from 'react-player'; // Base import covers YouTube
 import { courses } from '../data';
+
+// Helper function to extract YouTube video ID from URL
+const extractVideoId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/v\/([^&\n?#]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
 
 // --- Helper Component: Quiz Section ---
 const QuizWindow = ({ quizData }) => {
@@ -97,11 +113,14 @@ const CourseDetail = () => {
             {/* 1. VIDEO LOGIC */}
             {currentLesson?.type === 'video' && (
               <div className="video-player" style={{ overflow: 'hidden', backgroundColor: 'black' }}>
-                <ReactPlayer 
-                  url={currentLesson.url} 
-                  width="100%" 
-                  height="100%" 
-                  controls={true} 
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${extractVideoId(currentLesson.url)}`}
+                  title="Video Player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
                 />
               </div>
             )}

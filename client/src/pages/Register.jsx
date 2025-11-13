@@ -330,7 +330,10 @@ const Register = () => {
         <div className="auth-footer">
           <p>
             Already have an account?
-            <Link to="/login" className="auth-link">
+            <Link
+              to="/login"
+              className="auth-link"
+            >
               Sign in
             </Link>
           </p>
@@ -342,6 +345,26 @@ const Register = () => {
             <strong>Demo Registration:</strong>
             <br />
             Fill in your details to create an account and start learning immediately!
+            <br />
+            <button
+              onClick={() => {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('user');
+                window.location.reload();
+              }}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+                color: '#a855f7',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                marginTop: '8px'
+              }}
+            >
+              Clear Auth State (for testing)
+            </button>
           </div>
         </div>
       </div>

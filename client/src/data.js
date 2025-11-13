@@ -10,94 +10,101 @@ export const courses = [
       // Syllabus ab Objects ka Array hai
       syllabus: [
         {
+          id: 100,
+          type: 'video',
+          title: 'React Complete Course - From Beginner to Advanced',
+          url: 'https://www.youtube.com/watch?v=LuNPCSNr-nE',
+          category: 'react'
+        },
+        {
           id: 101,
           type: 'video',
           title: 'Test Video - Never Gonna Give You Up',
-          url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
           category: 'react'
         },
         {
           id: 105,
           type: 'video',
           title: 'React Full Tutorial (Provided Link)',
-          url: 'https://www.youtube.com/embed/sBws8MSXN7A',
+          url: 'https://www.youtube.com/watch?v=sBws8MSXN7A',
           category: 'react'
         },
         {
           id: 106,
           type: 'video',
           title: 'React Deep Dive (timestamped)',
-          url: 'https://www.youtube.com/embed/sBws8MSXN7A?start=40390',
+          url: 'https://www.youtube.com/watch?v=sBws8MSXN7A&t=40390s',
           category: 'react'
         },
         {
           id: 107,
           type: 'video',
           title: 'Data Science with Python - Basics',
-          url: 'https://www.youtube.com/embed/vmEHCJofslg',
+          url: 'https://www.youtube.com/watch?v=vmEHCJofslg',
           category: 'data-science'
         },
         {
           id: 108,
           type: 'video',
           title: 'Machine Learning Fundamentals',
-          url: 'https://www.youtube.com/embed/ukzFI9rgwfU',
+          url: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
           category: 'ai-ml'
         },
         {
           id: 109,
           type: 'video',
           title: 'Node.js Crash Course',
-          url: 'https://www.youtube.com/embed/fBNz5xF-Kx4',
+          url: 'https://www.youtube.com/watch?v=fBNz5xF-Kx4',
           category: 'nodejs'
         },
         {
           id: 110,
           type: 'video',
           title: 'MongoDB Tutorial',
-          url: 'https://www.youtube.com/embed/ofme2o29ngU',
+          url: 'https://www.youtube.com/watch?v=ofme2o29ngU',
           category: 'mongodb'
         },
         {
           id: 111,
           type: 'video',
           title: 'Express.js Guide',
-          url: 'https://www.youtube.com/embed/L72fhGm1tfE',
+          url: 'https://www.youtube.com/watch?v=L72fhGm1tfE',
           category: 'express'
         },
         {
           id: 112,
           type: 'video',
           title: 'Python for Beginners',
-          url: 'https://www.youtube.com/embed/rfscVS0vtbw',
+          url: 'https://www.youtube.com/watch?v=rfscVS0vtbw',
           category: 'python'
         },
         {
           id: 113,
           type: 'video',
           title: 'JavaScript ES6 Features',
-          url: 'https://www.youtube.com/embed/jS4aFq5-91M',
+          url: 'https://www.youtube.com/watch?v=jS4aFq5-91M',
           category: 'javascript'
         },
         {
           id: 114,
           type: 'video',
           title: 'HTML & CSS Basics',
-          url: 'https://www.youtube.com/embed/UB1O30fR-EE',
+          url: 'https://www.youtube.com/watch?v=UB1O30fR-EE',
           category: 'html-css'
         },
         {
           id: 115,
           type: 'video',
           title: 'Git and GitHub Tutorial',
-          url: 'https://www.youtube.com/embed/SWYqp7iY_Tc',
+          url: 'https://www.youtube.com/watch?v=SWYqp7iY_Tc',
           category: 'git'
         },
         {
           id: 116,
           type: 'video',
           title: 'Docker for Beginners',
-          url: 'https://www.youtube.com/embed/fqMOX6JJhGo',
+          url: 'https://www.youtube.com/watch?v=fqMOX6JJhGo',
           category: 'docker'
         },
         {
@@ -153,77 +160,84 @@ export const courses = [
           id: 124,
           type: 'video',
           title: 'Git Branching and Merging',
-          url: 'https://www.youtube.com/embed/FyAAIHHClqI',
+          url: 'https://www.youtube.com/watch?v=FyAAIHHClqI',
           category: 'git'
         },
         {
           id: 125,
           type: 'video',
           title: 'Docker Compose Tutorial',
-          url: 'https://www.youtube.com/embed/HG6yIjZapSA',
+          url: 'https://www.youtube.com/watch?v=HG6yIjZapSA',
           category: 'docker'
         },
         {
           id: 126,
           type: 'video',
           title: 'AWS S3 Bucket Setup',
-          url: 'https://www.youtube.com/embed/77lMCrQg6HE',
+          url: 'https://www.youtube.com/watch?v=77lMCrQg6HE',
           category: 'aws'
         },
         {
           id: 127,
           type: 'video',
           title: 'Cybersecurity Basics for Beginners',
-          url: 'https://www.youtube.com/embed/rcDO8km6R6c',
+          url: 'https://www.youtube.com/watch?v=rcDO8km6R6c',
           category: 'cybersecurity'
         },
         {
           id: 128,
           type: 'video',
           title: 'UI/UX Design Process',
-          url: 'https://www.youtube.com/embed/hvL1339luv0',
+          url: 'https://www.youtube.com/watch?v=hvL1339luv0',
           category: 'ui-ux'
         },
         {
           id: 129,
           type: 'video',
           title: 'Machine Learning with Scikit-Learn',
-          url: 'https://www.youtube.com/embed/0Lt9w-BxKFQ',
+          url: 'https://www.youtube.com/watch?v=0Lt9w-BxKFQ',
           category: 'ai-ml'
         },
         {
           id: 130,
           type: 'video',
           title: 'Node.js REST API Tutorial',
-          url: 'https://www.youtube.com/embed/pKd0Rpw7O48',
+          url: 'https://www.youtube.com/watch?v=pKd0Rpw7O48',
           category: 'nodejs'
         },
         {
           id: 131,
           type: 'video',
           title: 'MongoDB Aggregation Pipeline',
-          url: 'https://www.youtube.com/embed/0L0kBK9Kc4g',
+          url: 'https://www.youtube.com/watch?v=0L0kBK9Kc4g',
           category: 'mongodb'
         },
         {
           id: 132,
           type: 'video',
           title: 'Express.js Middleware',
-          url: 'https://www.youtube.com/embed/lY6icfhap2o',
+          url: 'https://www.youtube.com/watch?v=lY6icfhap2o',
           category: 'express'
         },
         {
           id: 133,
           type: 'video',
           title: 'Data Visualization with Matplotlib',
-          url: 'https://www.youtube.com/embed/DAQNHzOcO5A',
+          url: 'https://www.youtube.com/watch?v=DAQNHzOcO5A',
           category: 'data-science'
         },
         {
           id: 134,
           type: 'video',
           title: 'Advanced React Patterns',
-          url: 'https://www.youtube.com/embed/5JzIuAQ7V6U',
+          url: 'https://www.youtube.com/watch?v=5JzIuAQ7V6U',
+          category: 'react'
+        },
+        {
+          id: 135,
+          type: 'video',
+          title: 'React Complete Course - From Beginner to Advanced',
+          url: 'https://www.youtube.com/watch?v=LuNPCSNr-nE',
           category: 'react'
         },
         {
@@ -255,7 +269,7 @@ export const courses = [
           id: 104,
           type: 'video',
           title: 'Project Setup Guide',
-          url: 'https://www.youtube.com/embed/QFaFIcGhPoM',
+          url: 'https://www.youtube.com/watch?v=QFaFIcGhPoM',
           category: 'react'
         }
       ]

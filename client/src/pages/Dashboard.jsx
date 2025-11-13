@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import ReactPlayer from 'react-player';
 import { Link, useLocation } from 'react-router-dom';
 import { courses, interviewQuestions } from '../data';
 import { FaPlayCircle, FaFilePdf, FaClipboardList, FaBook, FaLaptopCode, FaDatabase, FaRobot, FaServer, FaCode, FaPython, FaJs, FaHtml5, FaGit, FaDocker, FaCloud, FaLock, FaPaintBrush, FaTools } from 'react-icons/fa';
@@ -8,6 +7,23 @@ const Dashboard = () => {
   const featuredCourse = courses[0];
   const recommendedLessons =
     (featuredCourse?.syllabus || []).filter(item => item.type === 'video').slice(0, 6);
+
+  // Helper function to extract YouTube video ID from URL
+  const extractVideoId = (url) => {
+    if (!url) return null;
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /youtube\.com\/v\/([^&\n?#]+)/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return null;
+  };
 
   // Aggregate resources across all courses
   const allVideos = useMemo(() => {
@@ -27,6 +43,8 @@ const Dashboard = () => {
       .filter(s => s.type === 'quiz')
       .map(s => ({ ...s, courseTitle: course.title, courseId: course.id })));
   }, []);
+
+  const [videoErrors, setVideoErrors] = useState({});
 
   const [activeTab, setActiveTab] = useState('courses');
   const [activeCategory, setActiveCategory] = useState(null); // null => show categories
@@ -100,12 +118,35 @@ const Dashboard = () => {
           <div className="dash-hero-left">
             <div className="dash-hero-player">
               {recommendedLessons[0] && (
-                <ReactPlayer
-                  url={recommendedLessons[0].url}
+                <iframe
                   width="100%"
                   height="100%"
-                  controls
+                  src={`https://www.youtube.com/embed/${extractVideoId(recommendedLessons[0].url)}`}
+                  title={recommendedLessons[0].title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onError={() => {
+                    console.error('Hero video error:', recommendedLessons[0].url);
+                    setVideoErrors(prev => ({ ...prev, [recommendedLessons[0].id]: true }));
+                  }}
                 />
+              )}
+              {videoErrors[recommendedLessons[0]?.id] && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  background: 'rgba(0,0,0,0.8)',
+                  padding: '1rem',
+                  borderRadius: '8px'
+                }}>
+                  <p>Video unavailable</p>
+                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>This video may have embedding disabled</p>
+                </div>
               )}
             </div>
           </div>
@@ -127,14 +168,36 @@ const Dashboard = () => {
         <div className="video-grid">
           {recommendedLessons.map(item => (
             <div key={item.id} className="video-card">
-              <ReactPlayer
-                url={item.url}
-                width="100%"
-                height="200px"
-                light
-                controls
-                playing={false}
-              />
+              {videoErrors[item.id] ? (
+                <div style={{
+                  width: '100%',
+                  height: '200px',
+                  background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '8px',
+                  color: '#6b7280',
+                  fontSize: '0.9rem',
+                  fontWeight: '600'
+                }}>
+                  Video Unavailable
+                </div>
+              ) : (
+                <iframe
+                  width="100%"
+                  height="200"
+                  src={`https://www.youtube.com/embed/${extractVideoId(item.url)}`}
+                  title={item.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onError={() => {
+                    console.error('Video card error:', item.url);
+                    setVideoErrors(prev => ({ ...prev, [item.id]: true }));
+                  }}
+                />
+              )}
               <div className="video-card-body">
                 <h3 className="video-title">{item.title}</h3>
                 <Link to={`/course/${featuredCourse?.id}`} className="btn" style={{ width: 'auto' }}>
@@ -251,7 +314,35 @@ const Dashboard = () => {
               {activeCategory === 'videos' && allVideos.map(v => (
                 <div key={`${v.id}-${v.courseId}`} className="resource-card resource-small">
                   <div className="resource-media">
-                    <ReactPlayer url={v.url} light width="160px" height="90px" />
+                    <iframe
+                      width="160"
+                      height="90"
+                      src={`https://www.youtube.com/embed/${extractVideoId(v.url)}`}
+                      title={v.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      onError={() => {
+                        console.error('Resource video error:', v.url);
+                        setVideoErrors(prev => ({ ...prev, [v.id]: true }));
+                      }}
+                    />
+                    {videoErrors[v.id] && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: 'white',
+                        textAlign: 'center',
+                        background: 'rgba(0,0,0,0.8)',
+                        padding: '0.25rem',
+                        borderRadius: '4px',
+                        fontSize: '0.7rem'
+                      }}>
+                        Unavailable
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h4>{v.title}</h4>
@@ -264,7 +355,35 @@ const Dashboard = () => {
               {activeCategory && !['videos', 'notes', 'exams', 'courses'].includes(activeCategory) && allVideos.filter(v => v.category === activeCategory).map(v => (
                 <div key={`${v.id}-${v.courseId}`} className="resource-card resource-small">
                   <div className="resource-media">
-                    <ReactPlayer url={v.url} light width="160px" height="90px" />
+                    <iframe
+                      width="160"
+                      height="90"
+                      src={`https://www.youtube.com/embed/${extractVideoId(v.url)}`}
+                      title={v.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      onError={() => {
+                        console.error('Category video error:', v.url);
+                        setVideoErrors(prev => ({ ...prev, [v.id]: true }));
+                      }}
+                    />
+                    {videoErrors[v.id] && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: 'white',
+                        textAlign: 'center',
+                        background: 'rgba(0,0,0,0.8)',
+                        padding: '0.25rem',
+                        borderRadius: '4px',
+                        fontSize: '0.7rem'
+                      }}>
+                        Unavailable
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h4>{v.title}</h4>
@@ -332,24 +451,35 @@ const Dashboard = () => {
           <div className="video-modal-inner" onClick={e => e.stopPropagation()}>
             <button className="video-modal-close" onClick={() => setModalVideoUrl(null)}>✕</button>
             <div style={{width: '100%', height: '100%', background: 'white'}}>
-              <ReactPlayer 
-                url={modalVideoUrl} 
-                playing={true}
-                controls 
-                width="100%" 
-                height="100%" 
-                config={{
-                  youtube: {
-                    playerVars: { 
-                      showinfo: 1,
-                      autoplay: 1,
-                      modestbranding: 1
-                    }
-                  }
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${extractVideoId(modalVideoUrl)}`}
+                title="Video Player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                onError={() => {
+                  console.error('Modal video error:', modalVideoUrl);
+                  setVideoErrors(prev => ({ ...prev, modal: true }));
                 }}
-                onReady={() => console.log('Video ready:', modalVideoUrl)}
-                onError={(error) => console.error('Video error:', error)}
               />
+              {videoErrors.modal && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  background: 'rgba(0,0,0,0.8)',
+                  padding: '1rem',
+                  borderRadius: '8px'
+                }}>
+                  <p>Video unavailable</p>
+                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>This video may have embedding disabled</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

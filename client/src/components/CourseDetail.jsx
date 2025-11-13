@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import ReactPlayer from 'react-player'; // Base import covers YouTube
 import { courses } from '../data';
+
+// Helper function to extract YouTube video ID from URL
+const extractVideoId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/v\/([^&\n?#]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
 
 // --- Helper Component: Quiz Section ---
 const QuizWindow = ({ quizData }) => {
@@ -75,10 +91,12 @@ const CourseDetail = () => {
   const { id } = useParams();
   const course = courses.find((c) => c.id === parseInt(id));
   const [currentLesson, setCurrentLesson] = useState(null);
+  const [videoError, setVideoError] = useState(false);
 
   useEffect(() => {
     if (course && course.syllabus) {
       setCurrentLesson(course.syllabus[0]);
+      setVideoError(false); // Reset error when changing lessons
     }
   }, [course]);
 
@@ -96,13 +114,36 @@ const CourseDetail = () => {
             
             {/* 1. VIDEO LOGIC */}
             {currentLesson?.type === 'video' && (
-              <div className="video-player" style={{ overflow: 'hidden', backgroundColor: 'black' }}>
-                <ReactPlayer 
-                  url={currentLesson.url} 
-                  width="100%" 
-                  height="100%" 
-                  controls={true} 
+              <div className="video-player" style={{ overflow: 'hidden', backgroundColor: 'black', position: 'relative' }}>
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${extractVideoId(currentLesson.url)}`}
+                  title="Video Player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onError={() => {
+                    console.error('Course video error:', currentLesson.url);
+                    setVideoError(true);
+                  }}
                 />
+                {videoError && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    color: 'white',
+                    textAlign: 'center',
+                    background: 'rgba(0,0,0,0.8)',
+                    padding: '1rem',
+                    borderRadius: '8px'
+                  }}>
+                    <p>Video unavailable</p>
+                    <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>This video may have embedding disabled</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -146,7 +187,10 @@ const CourseDetail = () => {
               {course.syllabus?.map((item, index) => (
                 <div 
                   key={item.id} 
-                  onClick={() => setCurrentLesson(item)}
+                  onClick={() => {
+                    setCurrentLesson(item);
+                    setVideoError(false);
+                  }}
                   className={`syllabus-item ${currentLesson?.id === item.id ? 'active' : ''}`}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
