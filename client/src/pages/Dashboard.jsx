@@ -1,121 +1,85 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { FaPlayCircle, FaFilePdf, FaClipboardList, FaBook, FaLaptopCode, FaDatabase, FaRobot, FaServer, FaCode, FaPython, FaJs, FaHtml5, FaGit, FaDocker, FaCloud, FaLock, FaPaintBrush, FaTools } from 'react-icons/fa';
+import { FaLaptopCode, FaDatabase, FaRobot, FaServer, FaCode, FaPython, FaJs, FaHtml5, FaGit, FaDocker, FaCloud, FaLock, FaPaintBrush, FaTools } from 'react-icons/fa';
+import { courses, interviewQuestions } from '../data';
 
 const Dashboard = () => {
-  const [courses, setCourses] = useState([]);
-  const [interviewQuestions, setInterviewQuestions] = useState([]);
+  // 1. State Initialization
+  const [coursesData, setCoursesData] = useState([]);
+  const [interviewQuestionsData, setInterviewQuestionsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // API base URL
-  const API_BASE_URL = 'http://localhost:5000/api';
-
-  // Fetch data from backend
+  // 2. Data Fetching (Simulated)
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [coursesResponse, questionsResponse] = await Promise.all([
-          axios.get(`${API_BASE_URL}/courses`),
-          axios.get(`${API_BASE_URL}/questions`)
-        ]);
+    // Data load hone ka wait karein taaki turant crash na ho
+    setCoursesData(courses || []);
+    setInterviewQuestionsData(interviewQuestions || []);
+    setLoading(false);
+  }, []);
 
-        setCourses(coursesResponse.data);
-        setInterviewQuestions(questionsResponse.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data. Please check if the backend server is running.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // 3. Derived Data (Calculations)
+  // Safety check: Agar coursesData empty hai, to undefined use mat karo
+  const featuredCourse = coursesData && coursesData.length > 0 ? coursesData[0] : null;
+  
+  // Safety check for syllabus
+  const recommendedLessons = featuredCourse?.syllabus 
+    ? featuredCourse.syllabus.filter(item => item.type === 'video').slice(0, 6) 
+    : [];
 
-    fetchData();
-  }, [API_BASE_URL]);
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>
-        <div>Loading LMS data...</div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>
-        <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>
-        <div style={{ fontSize: '0.9rem', color: '#666' }}>
-          Make sure the backend server is running on port 5000.
-        </div>
-      </div>
-    );
-  }
-
-  const featuredCourse = courses[0];
-  const recommendedLessons =
-    (featuredCourse?.syllabus || []).filter(item => item.type === 'video').slice(0, 6);
-
-  // Helper function to extract YouTube video ID from URL
+  // Helper: Extract Video ID
   const extractVideoId = (url) => {
     if (!url) return null;
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /youtube\.com\/v\/([^&\n?#]+)/
     ];
-    
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
+      if (match && match[1]) return match[1];
     }
     return null;
   };
 
-  // Aggregate resources across all courses
+  // Aggregate resources (Memoized for performance)
   const allVideos = useMemo(() => {
-    return courses.flatMap(course => (course.syllabus || [])
+    if (!coursesData) return [];
+    return coursesData.flatMap(course => (course.syllabus || [])
       .filter(s => s.type === 'video')
       .map(s => ({ ...s, courseTitle: course.title, courseId: course.id })));
-  }, []);
+  }, [coursesData]);
 
   const allNotes = useMemo(() => {
-    return courses.flatMap(course => (course.syllabus || [])
+    if (!coursesData) return [];
+    return coursesData.flatMap(course => (course.syllabus || [])
       .filter(s => s.type === 'note')
       .map(s => ({ ...s, courseTitle: course.title, courseId: course.id })));
-  }, []);
+  }, [coursesData]);
 
   const allExams = useMemo(() => {
-    return courses.flatMap(course => (course.syllabus || [])
+    if (!coursesData) return [];
+    return coursesData.flatMap(course => (course.syllabus || [])
       .filter(s => s.type === 'quiz')
       .map(s => ({ ...s, courseTitle: course.title, courseId: course.id })));
-  }, []);
+  }, [coursesData]);
 
+  // UI States
   const [videoErrors, setVideoErrors] = useState({});
-
-  const [activeTab, setActiveTab] = useState('courses');
-  const [activeCategory, setActiveCategory] = useState(null); // null => show categories
+  const [activeCategory, setActiveCategory] = useState(null);
   const [modalVideoUrl, setModalVideoUrl] = useState(null);
 
-  // Interview questions state
+  // Interview States
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showAnswer, setShowAnswer] = useState(false);
   const [interviewCategory, setInterviewCategory] = useState('all');
 
-  const allCourses = courses || [];
-
   const location = useLocation();
 
-  // Shuffle interview questions
+  // 4. Interview Logic
   useEffect(() => {
+    if (!interviewQuestionsData || interviewQuestionsData.length === 0) return;
+
     const shuffleArray = (array) => {
       const shuffled = [...array];
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -126,51 +90,51 @@ const Dashboard = () => {
     };
 
     const filteredQuestions = interviewCategory === 'all' 
-      ? interviewQuestions 
-      : interviewQuestions.filter(q => q.category === interviewCategory);
+      ? interviewQuestionsData 
+      : interviewQuestionsData.filter(q => q.category === interviewCategory);
     
     setShuffledQuestions(shuffleArray(filteredQuestions));
     setCurrentQuestionIndex(0);
     setSelectedAnswer('');
     setShowAnswer(false);
-  }, [interviewCategory]);
+  }, [interviewCategory, interviewQuestionsData]);
 
-  // Initialize questions on mount
+  // URL Category Logic
   useEffect(() => {
-    const shuffleArray = (array) => {
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    };
-
-    setShuffledQuestions(shuffleArray(interviewQuestions));
-  }, []);
-
-  useEffect(() => {
-    // Read query param 'category' and set activeCategory when present
     const params = new URLSearchParams(location.search);
     const cat = params.get('category');
-    if (cat) {
-      // normalize common values
-      const c = cat.toLowerCase();
-      const validCategories = ['courses', 'videos', 'notes', 'exams', 'react', 'data-science', 'ai-ml', 'nodejs', 'mongodb', 'express', 'python', 'javascript', 'html-css', 'git', 'docker', 'aws', 'cybersecurity', 'ui-ux', 'devops'];
-      if (validCategories.includes(c)) {
-        setActiveCategory(c);
-      }
-    }
+    if (cat) setActiveCategory(cat.toLowerCase());
   }, [location.search]);
+
+
+  // --- RETURN: Loading Screen (To prevent White Screen) ---
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <h2>Loading Dashboard...</h2>
+      </div>
+    );
+  }
+
+  // --- RETURN: Empty State (To prevent Crash) ---
+  if (!coursesData || coursesData.length === 0) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '4rem' }}>
+        <h2>No Data Found</h2>
+        <p>Please check your data.js file.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Featured Video Hero */}
+      {/* 1. HERO SECTION */}
       <section className="container">
         <div className="dash-hero">
           <div className="dash-hero-left">
             <div className="dash-hero-player">
-              {recommendedLessons[0] && (
+              {/* Safe Check: Video tabhi dikhao jab URL maujood ho */}
+              {recommendedLessons[0] && recommendedLessons[0].url ? (
                 <iframe
                   width="100%"
                   height="100%"
@@ -179,62 +143,39 @@ const Dashboard = () => {
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  onError={() => {
-                    console.error('Hero video error:', recommendedLessons[0].url);
-                    setVideoErrors(prev => ({ ...prev, [recommendedLessons[0].id]: true }));
-                  }}
+                  onError={() => setVideoErrors(prev => ({ ...prev, [recommendedLessons[0].id]: true }))}
                 />
-              )}
-              {videoErrors[recommendedLessons[0]?.id] && (
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  color: 'white',
-                  textAlign: 'center',
-                  background: 'rgba(0,0,0,0.8)',
-                  padding: '1rem',
-                  borderRadius: '8px'
-                }}>
-                  <p>Video unavailable</p>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>This video may have embedding disabled</p>
+              ) : (
+                <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100%', background:'#000', color:'white'}}>
+                  Video Loading...
                 </div>
               )}
             </div>
           </div>
           <div className="dash-hero-right">
-            <h1 className="dash-hero-title">{featuredCourse?.title}</h1>
+            {/* Safe Checks using ?. */}
+            <h1 className="dash-hero-title">{featuredCourse?.title || "Course Title"}</h1>
             <p className="dash-hero-subtitle">Kickstart your learning with our most popular course.</p>
             <div className="dash-hero-meta">
-              <span>⭐ {featuredCourse?.rating}</span>
-              <span className="price">{featuredCourse?.price}</span>
+              <span>⭐ {featuredCourse?.rating || "4.5"}</span>
+              <span className="price">{featuredCourse?.price || "Free"}</span>
             </div>
-            <Link to={`/course/${featuredCourse?.id}`} className="btn">Continue Learning</Link>
+            {featuredCourse && (
+              <Link to={`/course/${featuredCourse.id}`} className="btn">Continue Learning</Link>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Recommended Videos */}
+      {/* 2. RECOMMENDED VIDEOS */}
       <section className="container">
         <h2 className="section-title">Recommended Videos</h2>
         <div className="video-grid">
           {recommendedLessons.map(item => (
             <div key={item.id} className="video-card">
               {videoErrors[item.id] ? (
-                <div style={{
-                  width: '100%',
-                  height: '200px',
-                  background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '8px',
-                  color: '#6b7280',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}>
-                  Video Unavailable
+                <div style={{ height: '200px', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  Unavailable
                 </div>
               ) : (
                 <iframe
@@ -243,509 +184,269 @@ const Dashboard = () => {
                   src={`https://www.youtube.com/embed/${extractVideoId(item.url)}`}
                   title={item.title}
                   frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  onError={() => {
-                    console.error('Video card error:', item.url);
-                    setVideoErrors(prev => ({ ...prev, [item.id]: true }));
-                  }}
+                  onError={() => setVideoErrors(prev => ({ ...prev, [item.id]: true }))}
                 />
               )}
               <div className="video-card-body">
                 <h3 className="video-title">{item.title}</h3>
-                <Link to={`/course/${featuredCourse?.id}`} className="btn" style={{ width: 'auto' }}>
-                  Watch Full Lesson
-                </Link>
+                {featuredCourse && (
+                   <Link to={`/course/${featuredCourse.id}`} className="btn" style={{ width: 'auto' }}>
+                     Watch Lesson
+                   </Link>
+                )}
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Categories-first view: show categories; click to drill into items */}
+      {/* 3. CATEGORIES & RESOURCES */}
       <section className="container">
         <h2 className="section-title">Explore Resources</h2>
 
-        {!activeCategory && (
+        {!activeCategory ? (
           <div className="category-grid">
+             {/* Aapke saare categories wapas aa gaye hain */}
             <div className="category-card" onClick={() => setActiveCategory('react')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaLaptopCode /></div>
-              <p className="category-label">React</p>
+              <div className="category-icon"><FaLaptopCode /></div><p className="category-label">React</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('data-science')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaDatabase /></div>
-              <p className="category-label">Data Science</p>
+              <div className="category-icon"><FaDatabase /></div><p className="category-label">Data Science</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('ai-ml')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaRobot /></div>
-              <p className="category-label">AI & Machine Learning</p>
+              <div className="category-icon"><FaRobot /></div><p className="category-label">AI & ML</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('nodejs')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaServer /></div>
-              <p className="category-label">Node.js</p>
+              <div className="category-icon"><FaServer /></div><p className="category-label">Node.js</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('mongodb')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaDatabase /></div>
-              <p className="category-label">MongoDB</p>
+              <div className="category-icon"><FaDatabase /></div><p className="category-label">MongoDB</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('express')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaCode /></div>
-              <p className="category-label">Express.js</p>
+              <div className="category-icon"><FaCode /></div><p className="category-label">Express.js</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('python')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaPython /></div>
-              <p className="category-label">Python</p>
+              <div className="category-icon"><FaPython /></div><p className="category-label">Python</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('javascript')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaJs /></div>
-              <p className="category-label">JavaScript</p>
+              <div className="category-icon"><FaJs /></div><p className="category-label">JavaScript</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('html-css')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaHtml5 /></div>
-              <p className="category-label">HTML & CSS</p>
+              <div className="category-icon"><FaHtml5 /></div><p className="category-label">HTML & CSS</p>
             </div>
-
-            <div className="category-card" onClick={() => setActiveCategory('git')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaGit /></div>
-              <p className="category-label">Git & GitHub</p>
+             <div className="category-card" onClick={() => setActiveCategory('git')} style={{cursor: 'pointer'}}>
+              <div className="category-icon"><FaGit /></div><p className="category-label">Git</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('docker')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaDocker /></div>
-              <p className="category-label">Docker</p>
+              <div className="category-icon"><FaDocker /></div><p className="category-label">Docker</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('aws')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaCloud /></div>
-              <p className="category-label">AWS</p>
+              <div className="category-icon"><FaCloud /></div><p className="category-label">AWS</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('cybersecurity')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaLock /></div>
-              <p className="category-label">Cybersecurity</p>
+              <div className="category-icon"><FaLock /></div><p className="category-label">Security</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('ui-ux')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaPaintBrush /></div>
-              <p className="category-label">UI/UX Design</p>
+              <div className="category-icon"><FaPaintBrush /></div><p className="category-label">UI/UX</p>
             </div>
-
             <div className="category-card" onClick={() => setActiveCategory('devops')} style={{cursor: 'pointer'}}>
-              <div className="category-icon"><FaTools /></div>
-              <p className="category-label">DevOps</p>
+              <div className="category-icon"><FaTools /></div><p className="category-label">DevOps</p>
             </div>
           </div>
-        )}
-
-        {activeCategory && (
+        ) : (
           <div>
             <button className="back-btn" onClick={() => setActiveCategory(null)}>← Back to categories</button>
+            
             <div className="resource-grid" style={{marginTop: '1rem'}}>
-              {activeCategory === 'courses' && allCourses.map(c => (
+              
+              {/* Courses Logic */}
+              {activeCategory === 'courses' && coursesData.map(c => (
                 <div key={c.id} className="resource-card">
                   <img src={c.thumbnail} alt={c.title} />
                   <div>
                     <h3>{c.title}</h3>
-                    <p className="instructor">By {c.instructor}</p>
-                    <div className="meta-info">
-                      <span>⭐ {c.rating}</span>
-                      <span className="price">{c.price}</span>
+                    <Link to={`/course/${c.id}`} className="btn">Open Course</Link>
+                  </div>
+                </div>
+              ))}
+
+              {/* Videos Logic */}
+              {(activeCategory === 'videos' || !['courses', 'notes', 'exams'].includes(activeCategory)) && 
+                allVideos.filter(v => activeCategory === 'videos' || v.category === activeCategory).map((v, idx) => (
+                  <div key={idx} className="resource-card resource-small">
+                    <div className="resource-media">
+                      <iframe width="160" height="90" src={`https://www.youtube.com/embed/${extractVideoId(v.url)}`} frameBorder="0" title={v.title} />
                     </div>
-                    <Link to={`/course/${c.id}`} className="btn" style={{width: 'auto'}}>Open Course</Link>
+                    <div>
+                      <h4>{v.title}</h4>
+                      <button onClick={() => setModalVideoUrl(v.url)} className="btn" style={{width:'auto'}}>Watch</button>
+                    </div>
                   </div>
-                </div>
               ))}
 
-              {activeCategory === 'videos' && allVideos.map(v => (
-                <div key={`${v.id}-${v.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media">
-                    <iframe
-                      width="160"
-                      height="90"
-                      src={`https://www.youtube.com/embed/${extractVideoId(v.url)}`}
-                      title={v.title}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      onError={() => {
-                        console.error('Resource video error:', v.url);
-                        setVideoErrors(prev => ({ ...prev, [v.id]: true }));
-                      }}
-                    />
-                    {videoErrors[v.id] && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: 'white',
-                        textAlign: 'center',
-                        background: 'rgba(0,0,0,0.8)',
-                        padding: '0.25rem',
-                        borderRadius: '4px',
-                        fontSize: '0.7rem'
-                      }}>
-                        Unavailable
-                      </div>
-                    )}
+              {/* Notes Logic */}
+              {(activeCategory === 'notes' || !['courses', 'videos', 'exams'].includes(activeCategory)) && 
+                allNotes.filter(n => activeCategory === 'notes' || n.category === activeCategory).map((n, idx) => (
+                  <div key={idx} className="resource-card resource-small">
+                    <div className="resource-media pdf-placeholder">PDF</div>
+                    <div>
+                      <h4>{n.title}</h4>
+                      <a href={n.url} target="_blank" rel="noreferrer" className="btn" style={{width:'auto'}}>Download</a>
+                    </div>
                   </div>
-                  <div>
-                    <h4>{v.title}</h4>
-                    <p className="muted">From: {v.courseTitle}</p>
-                    <button onClick={() => setModalVideoUrl(v.url)} className="btn" style={{width: 'auto'}}>Watch</button>
-                  </div>
-                </div>
               ))}
 
-              {activeCategory && !['videos', 'notes', 'exams', 'courses'].includes(activeCategory) && allVideos.filter(v => v.category === activeCategory).map(v => (
-                <div key={`${v.id}-${v.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media">
-                    <iframe
-                      width="160"
-                      height="90"
-                      src={`https://www.youtube.com/embed/${extractVideoId(v.url)}`}
-                      title={v.title}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      onError={() => {
-                        console.error('Category video error:', v.url);
-                        setVideoErrors(prev => ({ ...prev, [v.id]: true }));
-                      }}
-                    />
-                    {videoErrors[v.id] && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: 'white',
-                        textAlign: 'center',
-                        background: 'rgba(0,0,0,0.8)',
-                        padding: '0.25rem',
-                        borderRadius: '4px',
-                        fontSize: '0.7rem'
-                      }}>
-                        Unavailable
-                      </div>
-                    )}
+               {/* Quiz Logic */}
+               {(activeCategory === 'exams' || !['courses', 'videos', 'notes'].includes(activeCategory)) && 
+                allExams.filter(e => activeCategory === 'exams' || e.category === activeCategory).map((e, idx) => (
+                  <div key={idx} className="resource-card resource-small">
+                    <div className="resource-media exam-placeholder">Quiz</div>
+                    <div>
+                      <h4>{e.title}</h4>
+                      <Link to={`/course/${e.courseId}`} className="btn" style={{width:'auto'}}>Attempt</Link>
+                    </div>
                   </div>
-                  <div>
-                    <h4>{v.title}</h4>
-                    <p className="muted">From: {v.courseTitle}</p>
-                    <button onClick={() => {
-                      console.log('Watch button clicked for category video:', v.title, 'URL:', v.url);
-                      setModalVideoUrl(v.url);
-                    }} className="btn" style={{width: 'auto'}}>Watch</button>
-                  </div>
-                </div>
-              ))}
-
-              {activeCategory === 'notes' && allNotes.map(n => (
-                <div key={`${n.id}-${n.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media pdf-placeholder">PDF</div>
-                  <div>
-                    <h4>{n.title}</h4>
-                    <p className="muted">From: {n.courseTitle}</p>
-                    <a href={n.url || '#'} className="btn" style={{width: 'auto'}}>Download</a>
-                  </div>
-                </div>
-              ))}
-
-              {activeCategory && !['videos', 'notes', 'exams', 'courses'].includes(activeCategory) && allNotes.filter(n => n.category === activeCategory).map(n => (
-                <div key={`${n.id}-${n.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media pdf-placeholder">PDF</div>
-                  <div>
-                    <h4>{n.title}</h4>
-                    <p className="muted">From: {n.courseTitle}</p>
-                    <a href={n.url || '#'} className="btn" style={{width: 'auto'}}>Download</a>
-                  </div>
-                </div>
-              ))}
-
-              {activeCategory === 'exams' && allExams.map(e => (
-                <div key={`${e.id}-${e.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media exam-placeholder">Quiz</div>
-                  <div>
-                    <h4>{e.title}</h4>
-                    <p className="muted">From: {e.courseTitle}</p>
-                    <Link to={`/course/${e.courseId}`} className="btn" style={{width: 'auto'}}>Attempt</Link>
-                  </div>
-                </div>
-              ))}
-
-              {activeCategory && !['videos', 'notes', 'exams', 'courses'].includes(activeCategory) && allExams.filter(e => e.category === activeCategory).map(e => (
-                <div key={`${e.id}-${e.courseId}`} className="resource-card resource-small">
-                  <div className="resource-media exam-placeholder">Quiz</div>
-                  <div>
-                    <h4>{e.title}</h4>
-                    <p className="muted">From: {e.courseTitle}</p>
-                    <Link to={`/course/${e.courseId}`} className="btn" style={{width: 'auto'}}>Attempt</Link>
-                  </div>
-                </div>
               ))}
             </div>
           </div>
         )}
       </section>
 
-      {/* Video modal overlay (plays videos inline, no redirect) */}
+      {/* Video Modal */}
       {modalVideoUrl && (
         <div className="video-modal" onClick={() => setModalVideoUrl(null)}>
-          {console.log('Modal opened with URL:', modalVideoUrl)}
           <div className="video-modal-inner" onClick={e => e.stopPropagation()}>
             <button className="video-modal-close" onClick={() => setModalVideoUrl(null)}>✕</button>
-            <div style={{width: '100%', height: '100%', background: 'white'}}>
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${extractVideoId(modalVideoUrl)}`}
-                title="Video Player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                onError={() => {
-                  console.error('Modal video error:', modalVideoUrl);
-                  setVideoErrors(prev => ({ ...prev, modal: true }));
-                }}
-              />
-              {videoErrors.modal && (
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  color: 'white',
-                  textAlign: 'center',
-                  background: 'rgba(0,0,0,0.8)',
-                  padding: '1rem',
-                  borderRadius: '8px'
-                }}>
-                  <p>Video unavailable</p>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>This video may have embedding disabled</p>
-                </div>
-              )}
-            </div>
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${extractVideoId(modalVideoUrl)}`}
+              title="Video Player"
+              frameBorder="0"
+              allowFullScreen
+            />
           </div>
         </div>
       )}
 
-      {/* Interview Questions Section */}
+      {/* 4. INTERVIEW SECTION */}
       <section className="container" id="interview-section">
         <h2 className="section-title">Interview Questions Practice</h2>
         
-        {/* Category Filter */}
+        {/* Filter Dropdown */}
         <div className="interview-filters" style={{marginBottom: '2rem'}}>
           <select 
             value={interviewCategory} 
             onChange={(e) => setInterviewCategory(e.target.value)}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              background: 'white',
-              fontSize: '0.9rem'
-            }}
+            style={{ padding: '0.5rem', borderRadius: '8px', marginRight: '1rem' }}
           >
             <option value="all">All Categories</option>
             <option value="react">React</option>
             <option value="javascript">JavaScript</option>
             <option value="nodejs">Node.js</option>
             <option value="mongodb">MongoDB</option>
-            <option value="express">Express.js</option>
             <option value="python">Python</option>
-            <option value="data-science">Data Science</option>
-            <option value="html-css">HTML/CSS</option>
-            <option value="git">Git</option>
-            <option value="docker">Docker</option>
-            <option value="aws">AWS</option>
-            <option value="ai-ml">AI/ML</option>
-            <option value="cybersecurity">Cybersecurity</option>
-            <option value="ui-ux">UI/UX</option>
-            <option value="devops">DevOps</option>
           </select>
-          
           <button 
-            onClick={() => {
-              const shuffleArray = (array) => {
-                const shuffled = [...array];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-                return shuffled;
-              };
-              const filteredQuestions = interviewCategory === 'all' 
-                ? interviewQuestions 
-                : interviewQuestions.filter(q => q.category === interviewCategory);
-              setShuffledQuestions(shuffleArray(filteredQuestions));
-              setCurrentQuestionIndex(0);
-              setSelectedAnswer('');
-              setShowAnswer(false);
-            }}
-            className="btn"
-            style={{marginLeft: '1rem'}}
+             className="btn"
+             onClick={() => {
+                // Shuffle logic reused
+                if(interviewQuestionsData.length === 0) return;
+                const questions = interviewCategory === 'all' ? interviewQuestionsData : interviewQuestionsData.filter(q => q.category === interviewCategory);
+                const shuffled = [...questions].sort(() => Math.random() - 0.5);
+                setShuffledQuestions(shuffled);
+                setCurrentQuestionIndex(0);
+                setShowAnswer(false);
+             }}
           >
-            Shuffle Questions
+            Shuffle
           </button>
         </div>
 
-        {/* Question Display */}
-        {shuffledQuestions.length > 0 && (
-          <div className="interview-question-card" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '2rem',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            marginBottom: '2rem'
-          }}>
-            <div style={{marginBottom: '1.5rem'}}>
-              <span style={{
-                background: 'var(--primary)',
-                color: 'white',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '20px',
-                fontSize: '0.8rem',
-                fontWeight: '600'
-              }}>
-                Question {currentQuestionIndex + 1} of {shuffledQuestions.length}
+        {shuffledQuestions.length > 0 && shuffledQuestions[currentQuestionIndex] ? (
+          <div className="interview-question-card" style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '15px', fontSize: '0.8rem', marginRight: '10px' }}>
+                 {currentQuestionIndex + 1} / {shuffledQuestions.length}
               </span>
-              <span style={{
-                marginLeft: '1rem',
-                background: '#f3f4f6',
-                color: '#374151',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '20px',
-                fontSize: '0.8rem',
-                fontWeight: '600'
-              }}>
-                {shuffledQuestions[currentQuestionIndex]?.category.toUpperCase()}
+              <span style={{ background: '#e5e7eb', padding: '4px 12px', borderRadius: '15px', fontSize: '0.8rem' }}>
+                {shuffledQuestions[currentQuestionIndex]?.category?.toUpperCase()}
               </span>
             </div>
 
-            <h3 style={{marginBottom: '1.5rem', color: '#111827'}}>
-              {shuffledQuestions[currentQuestionIndex]?.question}
-            </h3>
+            <h3 style={{ marginBottom: '1.5rem' }}>{shuffledQuestions[currentQuestionIndex]?.question}</h3>
 
-            {shuffledQuestions[currentQuestionIndex]?.type === 'mcq' ? (
-              <div style={{marginBottom: '1.5rem'}}>
-                {shuffledQuestions[currentQuestionIndex]?.options.map((option, index) => (
-                  <div key={index} style={{marginBottom: '0.5rem'}}>
-                    <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
-                      <input
-                        type="radio"
-                        name="answer"
-                        value={option}
-                        checked={selectedAnswer === option}
-                        onChange={(e) => setSelectedAnswer(e.target.value)}
-                        disabled={showAnswer}
-                        style={{marginRight: '0.75rem'}}
-                      />
-                      <span style={{color: showAnswer && option === shuffledQuestions[currentQuestionIndex]?.correct ? '#059669' : '#374151'}}>
-                        {option}
-                      </span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{marginBottom: '1.5rem'}}>
-                <textarea
-                  placeholder="Type your answer here..."
+            {/* MCQ Options */}
+            {shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && (
+               <div style={{marginBottom: '1.5rem'}}>
+                 {shuffledQuestions[currentQuestionIndex].options.map((opt, i) => (
+                   <div key={i} style={{marginBottom: '0.5rem'}}>
+                     <label style={{cursor:'pointer'}}>
+                       <input 
+                         type="radio" 
+                         name="ans" 
+                         value={opt} 
+                         checked={selectedAnswer === opt}
+                         onChange={(e) => setSelectedAnswer(e.target.value)}
+                         style={{marginRight: '10px'}}
+                       />
+                       {opt}
+                     </label>
+                   </div>
+                 ))}
+               </div>
+            )}
+             {/* Text Input for Short Answer */}
+            {shuffledQuestions[currentQuestionIndex]?.type !== 'mcq' && (
+                <textarea 
+                  placeholder="Type your answer..." 
+                  style={{width:'100%', padding:'10px', marginBottom:'1rem', borderRadius:'8px', border:'1px solid #ccc'}}
                   value={selectedAnswer}
                   onChange={(e) => setSelectedAnswer(e.target.value)}
-                  disabled={showAnswer}
-                  style={{
-                    width: '100%',
-                    minHeight: '100px',
-                    padding: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    resize: 'vertical'
-                  }}
                 />
+            )}
+
+            {!showAnswer ? (
+              <button onClick={() => setShowAnswer(true)} className="btn">Show Answer</button>
+            ) : (
+              <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px' }}>
+                <strong>Answer: </strong>
+                {shuffledQuestions[currentQuestionIndex]?.answer || shuffledQuestions[currentQuestionIndex]?.correct}
+                {shuffledQuestions[currentQuestionIndex]?.explanation && <p style={{marginTop: '0.5rem', color: '#555'}}>{shuffledQuestions[currentQuestionIndex]?.explanation}</p>}
               </div>
             )}
 
-            <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
-              {!showAnswer ? (
-                <button 
-                  onClick={() => setShowAnswer(true)}
-                  className="btn"
-                  disabled={shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && !selectedAnswer}
-                >
-                  Show Answer
-                </button>
-              ) : (
-                <div style={{width: '100%'}}>
-                  <div style={{
-                    background: shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && selectedAnswer === shuffledQuestions[currentQuestionIndex]?.correct ? '#d1fae5' : '#fef3c7',
-                    border: `1px solid ${shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && selectedAnswer === shuffledQuestions[currentQuestionIndex]?.correct ? '#059669' : '#d97706'}`,
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <h4 style={{
-                      margin: '0 0 0.5rem 0',
-                      color: shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && selectedAnswer === shuffledQuestions[currentQuestionIndex]?.correct ? '#059669' : '#d97706'
-                    }}>
-                      {shuffledQuestions[currentQuestionIndex]?.type === 'mcq' && selectedAnswer === shuffledQuestions[currentQuestionIndex]?.correct ? '✅ Correct!' : 'Answer:'}
-                    </h4>
-                    
-                    {shuffledQuestions[currentQuestionIndex]?.type === 'mcq' ? (
-                      <div>
-                        <p style={{margin: '0 0 0.5rem 0', fontWeight: '600'}}>
-                          Correct Answer: {shuffledQuestions[currentQuestionIndex]?.correct}
-                        </p>
-                        {shuffledQuestions[currentQuestionIndex]?.explanation && (
-                          <p style={{margin: 0, fontSize: '0.9rem', color: '#6b7280'}}>
-                            {shuffledQuestions[currentQuestionIndex]?.explanation}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <p style={{margin: 0}}>
-                        {shuffledQuestions[currentQuestionIndex]?.answer}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <button 
-                    onClick={() => {
-                      setShowAnswer(false);
-                      setSelectedAnswer('');
-                      setCurrentQuestionIndex((prev) => 
-                        prev < shuffledQuestions.length - 1 ? prev + 1 : 0
-                      );
-                    }}
-                    className="btn"
-                  >
-                    Next Question
-                  </button>
-                </div>
-              )}
-            </div>
+            <button 
+              onClick={() => {
+                setShowAnswer(false);
+                setSelectedAnswer('');
+                setCurrentQuestionIndex((prev) => (prev + 1) % shuffledQuestions.length);
+              }} 
+              className="btn"
+              style={{marginLeft: '1rem'}}
+            >
+              Next Question
+            </button>
           </div>
+        ) : (
+          <p>No interview questions available.</p>
         )}
       </section>
 
-      {/* CTA */}
+      {/* 5. CTA SECTION (Fixed) */}
       <section className="cta-section">
         <div className="container cta-inner">
           <h2>Keep your streak going!</h2>
           <p>Complete at least one lesson today and earn bonus points.</p>
-          <Link to={`/course/${featuredCourse?.id}`} className="btn" style={{ width: 'auto' }}>
-            Resume Course
-          </Link>
+          {featuredCourse ? (
+            <Link to={`/course/${featuredCourse.id}`} className="btn" style={{ width: 'auto' }}>
+              Resume Course
+            </Link>
+          ) : (
+             <button className="btn" disabled>Loading...</button>
+          )}
         </div>
       </section>
     </div>
@@ -753,4 +454,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

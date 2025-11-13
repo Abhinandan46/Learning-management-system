@@ -184,7 +184,7 @@ const CourseDetail = () => {
           <div className="syllabus-card">
             <h3>Course Content</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-              {course.syllabus?.map((item, index) => (
+              {course.syllabus?.map((item) => (
                 <div 
                   key={item.id} 
                   onClick={() => {

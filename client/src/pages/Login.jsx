@@ -37,23 +37,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Use the actual login method from AuthContext
+      const result = login(email, password);
 
-      // Demo login - create user data
-      const userData = {
-        name: email.split('@')[0], // Use email prefix as name
-        email: email,
-        role: 'student'
-      };
-
-      setSuccess(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      login(userData);
-      navigate('/', { replace: true });
-    } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      if (result.success) {
+        setSuccess(true);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        navigate('/', { replace: true });
+      } else {
+        setError(result.error);
+        shakeForm();
+      }
+    } catch {
+      setError('Login failed. Please try again.');
       shakeForm();
     } finally {
       setLoading(false);
@@ -209,14 +205,17 @@ const Login = () => {
         <div className="demo-notice">
           <div className="demo-icon">🎓</div>
           <div>
-            <strong>Demo Login:</strong>
+            <strong>Demo Credentials:</strong>
             <br />
-            Enter any email and password to continue.
+            Student: john@example.com / password123
+            <br />
+            Admin: admin@example.com / admin123
             <br />
             <button
               onClick={() => {
                 localStorage.removeItem('isAuthenticated');
-                localStorage.removeItem('user');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userData');
                 window.location.reload();
               }}
               style={{
@@ -230,7 +229,7 @@ const Login = () => {
                 marginTop: '8px'
               }}
             >
-              Clear Auth State (for testing)
+              Reset All Data (for testing)
             </button>
           </div>
         </div>

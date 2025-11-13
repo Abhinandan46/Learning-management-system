@@ -18,7 +18,7 @@ const Register = () => {
   const [success, setSuccess] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,24 +73,18 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Use the actual register method from AuthContext
+      const result = register(formData);
 
-      // For demo purposes, create user account
-      // In real app, this would be an API call to register the user
-      const userData = {
-        name: formData.name,
-        email: formData.email,
-        role: 'student',
-        registeredAt: new Date().toISOString()
-      };
-
-      setSuccess(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      login(userData);
-      navigate('/', { replace: true });
-    } catch (err) {
+      if (result.success) {
+        setSuccess(true);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        navigate('/', { replace: true });
+      } else {
+        setError(result.error);
+        shakeForm();
+      }
+    } catch {
       setError('Registration failed. Please try again.');
       shakeForm();
     } finally {
@@ -342,14 +336,15 @@ const Register = () => {
         <div className="demo-notice register-notice">
           <div className="demo-icon">🎓</div>
           <div>
-            <strong>Demo Registration:</strong>
+            <strong>Registration:</strong>
             <br />
-            Fill in your details to create an account and start learning immediately!
+            Create your account to start learning! Your data will be stored locally.
             <br />
             <button
               onClick={() => {
                 localStorage.removeItem('isAuthenticated');
-                localStorage.removeItem('user');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userData');
                 window.location.reload();
               }}
               style={{
@@ -363,7 +358,7 @@ const Register = () => {
                 marginTop: '8px'
               }}
             >
-              Clear Auth State (for testing)
+              Reset All Data (for testing)
             </button>
           </div>
         </div>

@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "password123",
+      "role": "student",
+      "registeredAt": "2025-11-13T10:00:00.000Z",
+      "lastLogin": null
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "password": "password456",
+      "role": "student",
+      "registeredAt": "2025-11-13T11:00:00.000Z",
+      "lastLogin": null
+    },
+    {
+      "id": 3,
+      "name": "Admin User",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "admin",
+      "registeredAt": "2025-11-13T09:00:00.000Z",
+      "lastLogin": null
+    }
+  ],
+  "sessions": []
+}

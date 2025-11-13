@@ -34,6 +34,85 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
+// Root Route Component (shows login for unauthenticated users, home for authenticated)
+const RootRoute = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  console.log('RootRoute render:', { isAuthenticated, loading });
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        background: '#f8fafc'
+      }}>
+        Loading application...
+      </div>
+    );
+  }
+
+  // Simple test render
+  if (typeof isAuthenticated === 'undefined') {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        background: '#f8fafc',
+        padding: '20px'
+      }}>
+        <h2>Authentication Status Unknown</h2>
+        <p>Checking authentication...</p>
+      </div>
+    );
+  }
+
+  try {
+    return isAuthenticated ? <Home /> : <Login />;
+  } catch (error) {
+    console.error('Component render error:', error);
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        background: '#f8fafc',
+        padding: '20px'
+      }}>
+        <h2>Application Error</h2>
+        <p>There was an error loading the application.</p>
+        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '10px' }}>
+          Error: {error.message}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            padding: '10px 20px',
+            background: '#06b6d4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            marginTop: '20px'
+          }}
+        >
+          Reload Page
+        </button>
+      </div>
+    );
+  }
+};
+
 // Public Route Component (redirects to home if already authenticated, but allows access to auth pages)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -66,19 +145,17 @@ const PublicRoute = ({ children }) => {
 
 function AppContent() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isRootLogin = location.pathname === '/' && !isAuthenticated;
 
   return (
     <>
-      {!isAuthPage && <Navbar />}
+      {!isAuthPage && !isRootLogin && <Navbar />}
 
       <main>
         <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/course/:id" element={
             <ProtectedRoute>
               <CourseDetail />
@@ -107,7 +184,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && !isRootLogin && <Footer />}
     </>
   );
 }
