@@ -1,0 +1,36 @@
+const express = require('express');
+const router = express.Router();
+const Course = require('../models/Course');
+
+// @desc    Get all courses
+// @route   GET /api/courses
+// @access  Public
+router.get('/', async (req, res) => {
+  try {
+    const courses = await Course.find({});
+    res.json(courses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// @desc    Get single course
+// @route   GET /api/courses/:id
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const course = await Course.findOne({ id: parseInt(req.params.id) });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    res.json(course);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+module.exports = router;

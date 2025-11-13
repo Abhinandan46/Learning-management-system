@@ -1,9 +1,62 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { courses, interviewQuestions } from '../data';
+import axios from 'axios';
 import { FaPlayCircle, FaFilePdf, FaClipboardList, FaBook, FaLaptopCode, FaDatabase, FaRobot, FaServer, FaCode, FaPython, FaJs, FaHtml5, FaGit, FaDocker, FaCloud, FaLock, FaPaintBrush, FaTools } from 'react-icons/fa';
 
 const Dashboard = () => {
+  const [courses, setCourses] = useState([]);
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // API base URL
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [coursesResponse, questionsResponse] = await Promise.all([
+          axios.get(`${API_BASE_URL}/courses`),
+          axios.get(`${API_BASE_URL}/questions`)
+        ]);
+
+        setCourses(coursesResponse.data);
+        setInterviewQuestions(questionsResponse.data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please check if the backend server is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [API_BASE_URL]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div>Loading LMS data...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>
+        <div style={{ fontSize: '0.9rem', color: '#666' }}>
+          Make sure the backend server is running on port 5000.
+        </div>
+      </div>
+    );
+  }
+
   const featuredCourse = courses[0];
   const recommendedLessons =
     (featuredCourse?.syllabus || []).filter(item => item.type === 'video').slice(0, 6);

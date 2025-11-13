@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { courses } from '../data';
+import axios from 'axios';
 
 // Helper function to extract YouTube video ID from URL
 const extractVideoId = (url) => {
@@ -9,7 +9,7 @@ const extractVideoId = (url) => {
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
     /youtube\.com\/v\/([^&\n?#]+)/
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) {
@@ -89,8 +89,33 @@ const QuizWindow = ({ quizData }) => {
 // --- Main Component ---
 const CourseDetail = () => {
   const { id } = useParams();
-  const course = courses.find((c) => c.id === parseInt(id));
+  const [course, setCourse] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Fetch course data from API
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/courses/${id}`);
+        setCourse(response.data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching course:', err);
+        setError('Failed to load course. Please check if the backend server is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourse();
+    }
+  }, [id, API_BASE_URL]);
 
   useEffect(() => {
     if (course && course.syllabus) {
@@ -98,7 +123,24 @@ const CourseDetail = () => {
     }
   }, [course]);
 
-  if (!course) return <div className="container">Loading...</div>;
+  // Show loading state
+  if (loading) {
+    return <div className="container">Loading course...</div>;
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>
+        <div style={{ fontSize: '0.9rem', color: '#666' }}>
+          Make sure the backend server is running on port 5000.
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) return <div className="container">Course not found</div>;
 
   return (
     <div className="container" style={{ marginTop: '2rem' }}>
