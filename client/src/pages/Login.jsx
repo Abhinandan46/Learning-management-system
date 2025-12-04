@@ -15,14 +15,6 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Add entrance animation
-    const timer = setTimeout(() => {
-      document.querySelector('.auth-box').classList.add('animate-in');
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -88,10 +80,47 @@ const Login = () => {
             />
           ))}
         </div>
+        <div className="particles">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 10}s`,
+                animationDuration: `${8 + Math.random() * 4}s`
+              }}
+            />
+          ))}
+        </div>
+        <div className="geometric-shapes">
+          <div className="triangle"></div>
+          <div className="square"></div>
+          <div className="circle-large"></div>
+        </div>
+        <div className="wave-effect"></div>
         <div className="gradient-overlay" />
       </div>
 
       <div className="auth-box">
+        {/* Welcome Illustration */}
+        <div className="welcome-illustration">
+          <div className="illustration-circle">
+            <div className="illustration-icon">🎓</div>
+            <div className="illustration-rings">
+              <div className="ring ring-1"></div>
+              <div className="ring ring-2"></div>
+              <div className="ring ring-3"></div>
+            </div>
+          </div>
+          <div className="illustration-stars">
+            <span className="star star-1">✨</span>
+            <span className="star star-2">⭐</span>
+            <span className="star star-3">🌟</span>
+          </div>
+        </div>
+
         {/* Success Animation */}
         {success && (
           <div className="success-overlay">

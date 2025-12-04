@@ -55,8 +55,6 @@ export const AuthProvider = ({ children }) => {
       const savedAuth = localStorage.getItem('isAuthenticated');
       const savedUser = localStorage.getItem('currentUser');
 
-      console.log('Auth check:', { savedAuth, savedUser });
-
       if (savedAuth === 'true' && savedUser) {
         setIsAuthenticated(true);
         setUser(JSON.parse(savedUser));

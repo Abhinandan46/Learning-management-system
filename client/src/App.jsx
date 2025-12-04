@@ -38,8 +38,6 @@ const ProtectedRoute = ({ children }) => {
 const RootRoute = () => {
   const { isAuthenticated, loading } = useAuth();
 
-  console.log('RootRoute render:', { isAuthenticated, loading });
-
   if (loading) {
     return (
       <div style={{

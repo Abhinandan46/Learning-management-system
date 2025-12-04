@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { courses } from '../data.js';
 
 // Helper function to extract YouTube video ID from URL
 const extractVideoId = (url) => {
@@ -94,19 +94,21 @@ const CourseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'http://localhost:5000/api';
-
-  // Fetch course data from API
+  // Fetch course data from local data
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourse = () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/courses/${id}`);
-        setCourse(response.data);
-        setError(null);
+        const courseData = courses.find(c => c.id === parseInt(id));
+        if (courseData) {
+          setCourse(courseData);
+          setError(null);
+        } else {
+          setError('Course not found.');
+        }
       } catch (err) {
         console.error('Error fetching course:', err);
-        setError('Failed to load course. Please check if the backend server is running.');
+        setError('Failed to load course.');
       } finally {
         setLoading(false);
       }
@@ -115,7 +117,7 @@ const CourseDetail = () => {
     if (id) {
       fetchCourse();
     }
-  }, [id, API_BASE_URL]);
+  }, [id]);
 
   useEffect(() => {
     if (course && course.syllabus) {
@@ -154,7 +156,7 @@ const CourseDetail = () => {
             
             {/* 1. VIDEO LOGIC */}
             {currentLesson?.type === 'video' && (
-              <div className="video-player" style={{ overflow: 'hidden', backgroundColor: 'black' }}>
+              <div className="video-player" style={{ height: '600px', overflow: 'hidden', backgroundColor: 'black' }}>
                 <iframe
                   width="100%"
                   height="100%"
