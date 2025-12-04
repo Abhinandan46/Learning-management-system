@@ -376,7 +376,7 @@ const Home = () => {
             <div className="resource-card">
               <h3>Semester 3 Notes</h3>
               <p>Database Management, Web Technologies, Python Programming</p>
-              <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+              <a href="https://drive.google.com/file/d/1qQq2x45TGmukI2Irk9aFsDez-P2gl-3h/view?usp=drivesdk" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Download</a>
             </div>
             <div className="resource-card">
               <h3>Semester 4 Notes</h3>
@@ -386,12 +386,12 @@ const Home = () => {
             <div className="resource-card">
               <h3>Semester 5 Notes</h3>
               <p>Android Development, Cloud Computing, Data Mining</p>
-              <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+              <a href="https://drive.google.com/file/d/1qG-HlZGoALsdMPxE9t88UYELr_DC-ZMN/view?usp=drivesdk" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Download</a>
             </div>
             <div className="resource-card">
               <h3>Semester 6 Notes</h3>
               <p>Project Management, AI & ML, Cybersecurity</p>
-              <Link to="/dashboard?category=notes" className="btn" style={{width: 'auto'}}>Download</Link>
+              <a href="https://drive.google.com/file/d/1qFWNB7VR0JFMB2Hpf7bXNWMffAsLGPUv/view?usp=drivesdk" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Download</a>
             </div>
           </div>
         </div>
@@ -430,32 +430,37 @@ const Home = () => {
             <div className="resource-card">
               <h3>Previous Year Papers</h3>
               <p>Question papers from 2018-2024 with solutions</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Download Papers</Link>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Download Papers</a>
             </div>
             <div className="resource-card">
               <h3>Sample Papers</h3>
               <p>Practice papers with detailed answer keys</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Practice Now</Link>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Practice Now</a>
             </div>
             <div className="resource-card">
               <h3>Important Questions</h3>
               <p>Frequently asked questions and model answers</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Study Questions</Link>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Study Questions</a>
             </div>
             <div className="resource-card">
               <h3>Mock Tests</h3>
               <p>Online mock tests with instant results</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Take Test</Link>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Take Test</a>
             </div>
             <div className="resource-card">
               <h3>Subject-wise Papers</h3>
               <p>Question papers organized by subject and semester</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Browse Papers</Link>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Browse Papers</a>
             </div>
             <div className="resource-card">
               <h3>University Guidelines</h3>
               <p>Exam patterns, marking schemes, and guidelines</p>
-              <Link to="/dashboard?category=exams" className="btn" style={{width: 'auto'}}>Exam Guide</Link>
+              <a href="https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Exam Guide</a>
+            </div>
+            <div className="resource-card">
+              <h3>BCA Question Papers Hub</h3>
+              <p>Complete collection of BCA question papers from various universities</p>
+              <a href="https://bcaquestionpaper.netlify.app/#" target="_blank" rel="noopener noreferrer" className="btn" style={{width: 'auto'}}>Visit Website</a>
             </div>
           </div>
         </div>

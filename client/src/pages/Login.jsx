@@ -35,7 +35,8 @@ const Login = () => {
       if (result.success) {
         setSuccess(true);
         await new Promise(resolve => setTimeout(resolve, 1500));
-        navigate('/', { replace: true });
+        // Force page reload to ensure authentication state is updated
+        window.location.href = '/';
       } else {
         setError(result.error);
         shakeForm();

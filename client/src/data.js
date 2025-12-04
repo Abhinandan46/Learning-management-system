@@ -274,6 +274,81 @@ export const courses = [
         }
       ]
     },
+    // BCA Study Materials
+    {
+      id: 2,
+      title: "BCA Study Materials",
+      instructor: "HPU Faculty",
+      rating: 4.9,
+      price: "Free",
+      thumbnail: "https://via.placeholder.com/300x200.png?text=BCA+Materials",
+      description: "Complete BCA study materials including notes, syllabus, and question papers.",
+      syllabus: [
+        {
+          id: 200,
+          type: 'note',
+          title: 'BCA Semester 6 Notes - Project Management, AI & ML, Cybersecurity',
+          url: 'https://drive.google.com/file/d/1qFWNB7VR0JFMB2Hpf7bXNWMffAsLGPUv/view?usp=drivesdk',
+          category: 'bca'
+        },
+        {
+          id: 201,
+          type: 'note',
+          title: 'BCA Semester 5 Notes - Android Development, Cloud Computing, Data Mining',
+          url: 'https://drive.google.com/file/d/1qG-HlZGoALsdMPxE9t88UYELr_DC-ZMN/view?usp=drivesdk',
+          category: 'bca'
+        },
+        {
+          id: 202,
+          type: 'note',
+          title: 'BCA Semester 3 Notes - Database Management, Web Technologies, Python Programming',
+          url: 'https://drive.google.com/file/d/1qQq2x45TGmukI2Irk9aFsDez-P2gl-3h/view?usp=drivesdk',
+          category: 'bca'
+        },
+        {
+          id: 203,
+          type: 'note',
+          title: 'BCA Complete Syllabus - Himachal Pradesh University',
+          url: 'https://hpuniv.ac.in/upload/syllabus/596af9ceda572BCACBCSSyllabus20161730.pdf',
+          category: 'bca'
+        },
+        {
+          id: 204,
+          type: 'note',
+          title: 'BCA Question Papers Hub - Complete Collection',
+          url: 'https://bcaquestionpaper.netlify.app/#',
+          category: 'bca'
+        },
+        {
+          id: 205,
+          type: 'note',
+          title: 'BCA Previous Year Papers (2018-2024)',
+          url: 'https://bcaquestionpaper.netlify.app/#',
+          category: 'bca'
+        },
+        {
+          id: 206,
+          type: 'note',
+          title: 'BCA Sample Papers with Answer Keys',
+          url: 'https://bcaquestionpaper.netlify.app/#',
+          category: 'bca'
+        },
+        {
+          id: 207,
+          type: 'note',
+          title: 'BCA Important Questions & Model Answers',
+          url: 'https://bcaquestionpaper.netlify.app/#',
+          category: 'bca'
+        },
+        {
+          id: 208,
+          type: 'note',
+          title: 'BCA Subject-wise Question Papers',
+          url: 'https://bcaquestionpaper.netlify.app/#',
+          category: 'bca'
+        },
+      ]
+    },
     // ... Baaki courses same pattern par update kar sakte hain
   ];
 
