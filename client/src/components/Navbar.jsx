@@ -41,6 +41,10 @@ const Navbar = () => {
               <FaUser size={16} />
               <span>{user?.name || 'User'}</span>
             </div>
+            <Link to="/profile" onClick={handleNavigate} className="profile-link">
+              <FaUser size={14} />
+              Profile
+            </Link>
             <button
               onClick={handleLogout}
               className="logout-btn"

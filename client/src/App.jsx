@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import "./App.css";
@@ -11,7 +12,78 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Interview from "./pages/Interview";
+import Profile from "./pages/Profile";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    });
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '20px',
+          margin: '20px',
+          border: '2px solid #ff6b6b',
+          borderRadius: '8px',
+          backgroundColor: '#ffeaea'
+        }}>
+          <h2 style={{ color: '#d63031' }}>Something went wrong!</h2>
+          <p>Please try refreshing the page or contact support.</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '10px 20px',
+              background: '#0984e3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginTop: '10px'
+            }}
+          >
+            Reload Page
+          </button>
+          {process.env.NODE_ENV === 'development' && (
+            <details style={{ marginTop: '20px' }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>Error Details (Development)</summary>
+              <pre style={{
+                background: '#f8f8f8',
+                padding: '10px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                overflow: 'auto',
+                marginTop: '10px'
+              }}>
+                {this.state.error && this.state.error.toString()}
+                <br />
+                {this.state.errorInfo && this.state.errorInfo.componentStack}
+              </pre>
+            </details>
+          )}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -34,7 +106,7 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-// Root Route Component (shows login for unauthenticated users, home for authenticated)
+// Root Route Component (shows home for authenticated users, login for unauthenticated)
 const RootRoute = () => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -53,62 +125,7 @@ const RootRoute = () => {
     );
   }
 
-  // Simple test render
-  if (typeof isAuthenticated === 'undefined') {
-    return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '1.2rem',
-        background: '#f8fafc',
-        padding: '20px'
-      }}>
-        <h2>Authentication Status Unknown</h2>
-        <p>Checking authentication...</p>
-      </div>
-    );
-  }
-
-  try {
-    return isAuthenticated ? <Home /> : <Login />;
-  } catch (error) {
-    console.error('Component render error:', error);
-    return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '1.2rem',
-        background: '#f8fafc',
-        padding: '20px'
-      }}>
-        <h2>Application Error</h2>
-        <p>There was an error loading the application.</p>
-        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '10px' }}>
-          Error: {error.message}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          style={{
-            padding: '10px 20px',
-            background: '#06b6d4',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            marginTop: '20px'
-          }}
-        >
-          Reload Page
-        </button>
-      </div>
-    );
-  }
+  return isAuthenticated ? <Home /> : <Navigate to="/login" replace />;
 };
 
 // Public Route Component (redirects to home if already authenticated, but allows access to auth pages)
@@ -167,6 +184,11 @@ function AppContent() {
           <Route path="/interview" element={
             <ProtectedRoute>
               <Interview />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
           <Route path="/login" element={

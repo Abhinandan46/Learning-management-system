@@ -10,11 +10,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--bg-light, #f3f4f6);
   color: var(--text-main, #1f2937);
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 a {
@@ -28,8 +33,31 @@ a:hover {
 
 button {
   font: inherit;
+  cursor: pointer;
 }
 
 #root {
   min-height: 100%;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Prevent text size adjustment on mobile */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }

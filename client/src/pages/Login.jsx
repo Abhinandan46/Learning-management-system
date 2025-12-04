@@ -35,8 +35,8 @@ const Login = () => {
       if (result.success) {
         setSuccess(true);
         await new Promise(resolve => setTimeout(resolve, 1500));
-        // Force page reload to ensure authentication state is updated
-        window.location.href = '/';
+        // Redirect to home page after successful login
+        navigate('/');
       } else {
         setError(result.error);
         shakeForm();

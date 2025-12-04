@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear LMS Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 LMS Data Reset Tool</h1>
+        <p>This tool will clear all LMS authentication data and reset the application.</p>
+
+        <button onclick="clearData()">Clear All LMS Data</button>
+        <button onclick="goToApp()">Go to LMS App</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function clearData() {
+            try {
+                localStorage.removeItem('userData');
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('currentUser');
+                document.getElementById('status').innerHTML = '<p class="success">✅ All LMS data cleared successfully! Refreshing page...</p>';
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5174';
+                }, 2000);
+            } catch (error) {
+                document.getElementById('status').innerHTML = '<p style="color: red;">❌ Error clearing data: ' + error.message + '</p>';
+            }
+        }
+
+        function goToApp() {
+            window.location.href = 'http://localhost:5174';
+        }
+    </script>
+</body>
+</html>

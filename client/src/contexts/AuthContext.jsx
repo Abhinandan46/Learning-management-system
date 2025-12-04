@@ -15,7 +15,12 @@ export const AuthProvider = ({ children }) => {
         password: "password123",
         role: "student",
         registeredAt: "2025-11-13T10:00:00.000Z",
-        lastLogin: null
+        lastLogin: null,
+        bio: "Passionate learner interested in technology and programming.",
+        phone: "+1 (555) 123-4567",
+        location: "New York, USA",
+        website: "https://johndoe.dev",
+        profilePicture: ""
       },
       {
         id: 2,
@@ -24,7 +29,12 @@ export const AuthProvider = ({ children }) => {
         password: "password456",
         role: "student",
         registeredAt: "2025-11-13T11:00:00.000Z",
-        lastLogin: null
+        lastLogin: null,
+        bio: "Full-stack developer with 5+ years of experience.",
+        phone: "+1 (555) 987-6543",
+        location: "San Francisco, USA",
+        website: "https://janesmith.tech",
+        profilePicture: ""
       },
       {
         id: 3,
@@ -33,7 +43,12 @@ export const AuthProvider = ({ children }) => {
         password: "admin123",
         role: "admin",
         registeredAt: "2025-11-13T09:00:00.000Z",
-        lastLogin: null
+        lastLogin: null,
+        bio: "System administrator managing the LMS platform.",
+        phone: "+1 (555) 000-0000",
+        location: "Remote",
+        website: "",
+        profilePicture: ""
       }
     ],
     sessions: []
@@ -45,27 +60,43 @@ export const AuthProvider = ({ children }) => {
 
   // Load data from localStorage (simulating reading from .data.json)
   useEffect(() => {
+    console.log('🔄 AuthContext: Initializing...');
     try {
       const savedData = localStorage.getItem('userData');
       if (savedData) {
+        console.log('📦 AuthContext: Found saved user data');
         setUserData(JSON.parse(savedData));
+      } else {
+        console.log('📦 AuthContext: Using initial data');
       }
 
       // Check if user is logged in
       const savedAuth = localStorage.getItem('isAuthenticated');
       const savedUser = localStorage.getItem('currentUser');
 
+      console.log('🔐 AuthContext: Auth check:', { savedAuth, hasSavedUser: !!savedUser });
+
       if (savedAuth === 'true' && savedUser) {
+        console.log('✅ AuthContext: User is authenticated');
         setIsAuthenticated(true);
         setUser(JSON.parse(savedUser));
+      } else {
+        console.log('❌ AuthContext: User not authenticated');
+        setIsAuthenticated(false);
+        setUser(null);
       }
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      console.error('❌ AuthContext: Initialization error:', error);
       // Clear corrupted data
       localStorage.removeItem('userData');
       localStorage.removeItem('isAuthenticated');
       localStorage.removeItem('currentUser');
+      // Reset to initial state
+      setIsAuthenticated(false);
+      setUser(null);
     }
+
+    console.log('🏁 AuthContext: Initialization complete, setting loading to false');
     setLoading(false);
   }, []);
 
@@ -158,8 +189,18 @@ export const AuthProvider = ({ children }) => {
     return userData.users;
   };
 
-  const getUserSessions = (userId) => {
-    return userData.sessions.filter(s => s.userId === userId);
+  const updateProfile = (profileData) => {
+    if (!user) return { success: false, error: 'No user logged in' };
+
+    const updatedUser = { ...user, ...profileData };
+    const updatedUsers = userData.users.map(u => u.id === user.id ? updatedUser : u);
+    const updatedData = { ...userData, users: updatedUsers };
+
+    saveUserData(updatedData);
+    setUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+    return { success: true, user: updatedUser };
   };
 
   const value = {
@@ -168,9 +209,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
     loading,
     getAllUsers,
-    getUserSessions,
     userData
   };
 
